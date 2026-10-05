@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111318">
+  <title>KLIKR — Clicker Game</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #111318;
+      --panel: #1b1e26;
+      --line: #303541;
+      --text: #f4f5f7;
+      --muted: #9ba2b0;
+      --lime: #c8ff5a;
+      --purple: #a88bff;
+    }
+
+    * { box-sizing: border-box }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      display: grid;
+      place-items: center;
+      color: var(--text);
+      background:
+        radial-gradient(ellipse at 50% 0%, #a88bff16, transparent 36rem),
+        var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    }
+
+    button { font: inherit }
+
+    .game {
+      width: min(100%, 760px);
+      padding: clamp(20px, 5vw, 42px);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: #1b1e26eF;
+      box-shadow: 0 25px 90px #0006;
+      text-align: center;
+    }
+
+    .brand {
+      margin: 0;
+      color: var(--lime);
+      font-size: .85rem;
+      font-weight: 950;
+      letter-spacing: .25em;
+    }
+
+    h1 {
+      margin: 8px 0 5px;
+      font-size: clamp(2rem, 7vw, 3.3rem);
+      letter-spacing: -.06em;
+    }
+
+    .subtitle { margin: 0; color: var(--muted) }
+
+    .score {
+      margin: 35px 0 5px;
+      font-size: clamp(3rem, 12vw, 6rem);
+      font-weight: 900;
+      letter-spacing: -.08em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score-label {
+      color: var(--muted);
+      font-size: .8rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .click-area {
+      position: relative;
+      display: grid;
+      min-height: 230px;
+      place-items: center;
+      margin: 25px 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at center, #c8ff5a0d, transparent 48%),
+        #14161c;
+    }
+
+    .click-button {
+      width: 170px;
+      height: 170px;
+      border: 0;
+      border-radius: 50%;
+      color: #171a12;
+      background: var(--lime);
+      box-shadow: 0 10px 0 #8dbb32, 0 18px 45px #c8ff5a2b;
+      font-size: 1.2rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+      transition: transform .08s, box-shadow .08s;
+      touch-action: manipulation;
+      user-select: none;
+    }
+
+    .click-button:hover { filter: brightness(1.06) }
+    .click-button:active,
+    .click-button.pressed {
+      transform: translateY(7px) scale(.97);
+      box-shadow: 0 3px 0 #8dbb32, 0 10px 25px #c8ff5a20;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 26px;
+    }
+
+    .stat {
+      padding: 14px 8px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #ffffff04;
+    }
+
+    .stat strong { display: block; font-size: 1.1rem }
+    .stat span { color: var(--muted); font-size: .72rem }
+
+    .shop {
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .shop-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .shop-heading h2 { margin: 0; font-size: 1rem }
+    .shop-heading span { color: var(--muted); font-size: .78rem }
+
+    .upgrade {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #ffffff04;
+    }
+
+    .upgrade + .upgrade { margin-top: 9px }
+    .upgrade h3 { margin: 0 0 4px; font-size: .9rem }
+    .upgrade p { margin: 0; color: var(--muted); font-size: .76rem }
+
+    .buy-button {
+      flex: 0 0 auto;
+      min-width: 105px;
+      padding: 9px 12px;
+      border: 0;
+      border-radius: 9px;
+      color: #171a12;
+      background: var(--lime);
+      font-size: .78rem;
+      font-weight: 850;
+    }
+
+    .buy-button:disabled {
+      cursor: not-allowed;
+      color: #8d929d;
+      background: #343945;
+    }
+
+    .bottom-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .utility-button {
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      color: var(--muted);
+      background: transparent;
+      font-size: .75rem;
+    }
+
+    .utility-button:hover { color: var(--text); border-color: #6b7280 }
+
+    .float-text {
+      position: absolute;
+      z-index: 2;
+      color: var(--lime);
+      font-size: 1.2rem;
+      font-weight: 900;
+      pointer-events: none;
+      animation: float-up .7s ease-out forwards;
+    }
+
+    @keyframes float-up {
+      from { opacity: 1; transform: translateY(0) scale(.8) }
+      to { opacity: 0; transform: translateY(-70px) scale(1.15) }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 13px }
+      .click-area { min-height: 205px }
+      .click-button { width: 145px; height: 145px }
+      .upgrade { align-items: flex-start }
+      .buy-button { min-width: 94px }
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <p class="brand">SOUR TECHNOLOGY PRESENTS</p>
+    <h1>KLIKR</h1>
+    <p class="subtitle">One click at a time. How far can you go?</p>
+
+    <div class="score" id="score" aria-live="polite">0</div>
+    <div class="score-label">total clicks</div>
+
+    <section class="click-area" id="clickArea" aria-label="Clicking game">
+      <button class="click-button" id="clickButton" type="button">
+        CLICK!
+      </button>
+    </section>
+
+    <section class="stats" aria-label="Game statistics">
+      <div class="stat">
+        <strong id="perClick">1</strong>
+        <span>per click</span>
+      </div>
+      <div class="stat">
+        <strong id="perSecond">0</strong>
+        <span>per second</span>
+      </div>
+      <div class="stat">
+        <strong id="totalClicks">0</strong>
+        <span>button presses</span>
+      </div>
+    </section>
+
+    <section class="shop">
+      <div class="shop-heading">
+        <h2>Upgrade shop</h2>
+        <span>Spend clicks to grow faster</span>
+      </div>
+
+      <div class="upgrade">
+        <div>
+          <h3>Stronger finger</h3>
+          <p>+1 click per press · Level <span id="clickLevel">0</span></p>
+        </div>
+        <button class="buy-button" id="clickUpgrade">Cost: 25</button>
+      </div>
+
+      <div class="upgrade">
+        <div>
+          <h3>Auto-KLIKR</h3>
+          <p>+1 click per second · Level <span id="autoLevel">0</span></p>
+        </div>
+        <button class="buy-button" id="autoUpgrade">Cost: 50</button>
+      </div>
+    </section>
+
+    <div class="bottom-row">
+      <button class="utility-button" id="saveButton" type="button">Save game</button>
+      <button class="utility-button" id="resetButton" type="button">Reset game</button>
+    </div>
+  </main>
+
+  <script>
+    const SAVE_KEY = "klikr-save-v1";
+
+    const state = {
+      score: 0,
+      perClick: 1,
+      perSecond: 0,
+      totalClicks: 0,
+      clickLevel: 0,
+      autoLevel: 0,
+      clickCost: 25,
+      autoCost: 50
+    };
+
+    const elements = {
+      score: document.getElementById("score"),
+      perClick: document.getElementById("perClick"),
+      perSecond: document.getElementById("perSecond"),
+      totalClicks: document.getElementById("totalClicks"),
+      clickLevel: document.getElementById("clickLevel"),
+      autoLevel: document.getElementById("autoLevel"),
+      clickUpgrade: document.getElementById("clickUpgrade"),
+      autoUpgrade: document.getElementById("autoUpgrade"),
+      clickButton: document.getElementById("clickButton"),
+      clickArea: document.getElementById("clickArea")
+    };
+
+    function formatNumber(number) {
+      return Math.floor(number).toLocaleString();
+    }
+
+    function render() {
+      elements.score.textContent = formatNumber(state.score);
+      elements.perClick.textContent = formatNumber(state.perClick);
+      elements.perSecond.textContent = formatNumber(state.perSecond);
+      elements.totalClicks.textContent = formatNumber(state.totalClicks);
+      elements.clickLevel.textContent = state.clickLevel;
+      elements.autoLevel.textContent = state.autoLevel;
+
+      elements.clickUpgrade.textContent = `Cost: ${formatNumber(state.clickCost)}`;
+      elements.autoUpgrade.textContent = `Cost: ${formatNumber(state.autoCost)}`;
+
+      elements.clickUpgrade.disabled = state.score < state.clickCost;
+      elements.autoUpgrade.disabled = state.score < state.autoCost;
+    }
+
+    function saveGame(showMessage = true) {
+      try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        if (showMessage) alert("Game saved!");
+      } catch {
+        if (showMessage) alert("Could not save the game in this browser.");
+      }
+    }
+
+    function loadGame() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(SAVE_KEY));
+        if (!saved || typeof saved !== "object") return;
+
+        for (const key of Object.keys(state)) {
+          if (Number.isFinite(saved[key]) && saved[key] >= 0) {
+            state[key] = saved[key];
+          }
+        }
+      } catch {
+        localStorage.removeItem(SAVE_KEY);
+      }
+    }
+
+    function showFloatText(event, amount) {
+      const areaRect = elements.clickArea.getBoundingClientRect();
+      const text = document.createElement("span");
+      text.className = "float-text";
+      text.textContent = `+${formatNumber(amount)}`;
+
+      const x = event.clientX ? event.clientX - areaRect.left : areaRect.width / 2;
+      const y = event.clientY ? event.clientY - areaRect.top : areaRect.height / 2;
+      text.style.left = `${x}px`;
+      text.style.top = `${y}px`;
+
+      elements.clickArea.appendChild(text);
+      text.addEventListener("animationend", () => text.remove(), { once: true });
+    }
+
+    elements.clickButton.addEventListener("click", (event) => {
+      state.score += state.perClick;
+      state.totalClicks += 1;
+      showFloatText(event, state.perClick);
+      render();
+    });
+
+    elements.clickUpgrade.addEventListener("click", () => {
+      if (state.score < state.clickCost) return;
+
+      state.score -= state.clickCost;
+      state.clickLevel += 1;
+      state.perClick += 1;
+      state.clickCost = Math.ceil(state.clickCost * 1.65);
+      render();
+      saveGame(false);
+    });
+
+    elements.autoUpgrade.addEventListener("click", () => {
+      if (state.score < state.autoCost) return;
+
+      state.score -= state.autoCost;
+      state.autoLevel += 1;
+      state.perSecond += 1;
+      state.autoCost = Math.ceil(state.autoCost * 1.7);
+      render();
+      saveGame(false);
+    });
+
+    document.getElementById("saveButton").addEventListener("click", () => {
+      saveGame(true);
+    });
+
+    document.getElementById("resetButton").addEventListener("click", () => {
+      if (!confirm("Reset your KLIKR game? This cannot be undone.")) return;
+
+      localStorage.removeItem(SAVE_KEY);
+      Object.assign(state, {
+        score: 0,
+        perClick: 1,
+        perSecond: 0,
+        totalClicks: 0,
+        clickLevel: 0,
+        autoLevel: 0,
+        clickCost: 25,
+        autoCost: 50
+      });
+      render();
+    });
+
+    setInterval(() => {
+      if (state.perSecond > 0) {
+        state.score += state.perSecond;
+        render();
+      }
+    }, 1000);
+
+    loadGame();
+    render();
+  </script>
+</body>
+</html>
